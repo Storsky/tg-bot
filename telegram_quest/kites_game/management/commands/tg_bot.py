@@ -16,6 +16,9 @@ class Command(BaseCommand):
         
 
 
+    
+
+
 @bot.message_handler(commands=['start'])
 def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -27,33 +30,55 @@ def start(message):
     for trigger in player.chapter_on.from_thread.all():
         btn = types.KeyboardButton(trigger.action)
         if trigger.action == 'Далее':
-            player.next_chapter = trigger.to_thread.id
+            player.next_chapter = trigger.to_thread
         markup.add(btn)
+
     player.save()
-    bot.send_message(message.from_user.id,
+    bot.send_photo(message.chat.id,
+                    player.chapter_on.image)
+    bot.send_message(message.chat.id,
                     player.chapter_on.text,
                      reply_markup=markup)
 
+@bot.message_handler(commands=['restart'])
+def restart(message):
+    chat_id = message.chat.id
+    bot.send_message(message.chat.id,
+                    '/start для начала игры')
+    player = Player.objects.get(chat_id= chat_id)                
+    player.chapter_on = Thread.objects.get(id=1)
+    player.next_chapter = 2
+    player.save()
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     player = Player.objects.get(chat_id= message.chat.id)
-    next_thread = player.next_chapter
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if message.text == 'Далее':
-        player.chapter_on = Thread.objects.get(pk=next_thread)
+        player.chapter_on = player.next_chapter
         player.save()
     else:
-        player.chapter_on = Thread.objects.get(name=message.text)
-        player.save()
+        try:
+            choice_thread = player.chapter_on.from_thread.filter(action = message.text)
+            player.chapter_on = choice_thread[0].to_thread
+            player.save()
+        except NameError:
+            bot.send_message(message.from_user.id,
+                    recent_thread.text,
+                    reply_markup=markup)
+
     
     recent_thread = player.chapter_on
     for trigger in recent_thread.from_thread.all():
         btn = types.KeyboardButton(trigger.action)
         if trigger.action == 'Далее':
-            player.next_chapter = trigger.to_thread.id
+            player.next_chapter = trigger.to_thread
         markup.add(btn)
     player.save()
+    try:
+        bot.send_photo(message.from_user.id,
+                        recent_thread.image)
+    except ValueError: pass
     bot.send_message(message.from_user.id,
                     recent_thread.text,
                     reply_markup=markup)

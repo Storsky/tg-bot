@@ -22,12 +22,13 @@ LOCATION_STATE = [
 
 class Player(models.Model):
     chat_id = models.IntegerField()
-    chapter_on = models.ForeignKey('Thread', on_delete=models.CASCADE, default=1)
-    next_chapter = models.IntegerField(blank=True, default=0)
+    chapter_on = models.ForeignKey('Thread', on_delete=models.CASCADE, related_name='player_recent' ,default=1)
+    next_chapter = models.ForeignKey('Thread', on_delete=models.CASCADE, related_name='player_next', default=2)
 
 class Thread(models.Model):
     name = models.CharField(max_length=50, default='message', verbose_name='Наз')
     text = models.TextField()
+    image = models.ImageField(blank=True, upload_to='static/images')
     trigger = models.ManyToManyField('self', through='Thread_Trigger')
 
     def __str__(self):

@@ -11,7 +11,7 @@ class DestinationAdmin(admin.TabularInline):
 
 class ThreadAdmin(admin.ModelAdmin):
     model = Thread
-    fields = ['name', 'text']
+    fields = ['name', 'text', 'image']
     inlines = [DepartureAdmin, DestinationAdmin,]
 
 
