@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+
+
+{{start.text}}
+
+<hr>
+{% for trigger in triggers %}
+{{trigger.action}}
+{{trigger.to_thread.id}}
+
+
+{% endfor %}
+
+<hr>
+
+{{chapter.thread_trigger}}
+
+
+
+   
+{% endblock content %}
